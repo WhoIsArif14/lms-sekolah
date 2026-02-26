@@ -22,4 +22,21 @@ class DiscussionController extends Controller
 
         return back()->with('success', 'Pesan diskusi terkirim!');
     }
+
+    public function destroy(Discussion $discussion)
+    {
+        // Hanya Admin atau Guru pemilik kursus yang boleh menghapus
+        // Atau siswa yang menulis pesan itu sendiri
+        if (
+            auth()->user()->role === 'admin' ||
+            auth()->id() === $discussion->course->user_id ||
+            auth()->id() === $discussion->user_id
+        ) {
+
+            $discussion->delete();
+            return back()->with('success', 'Pesan berhasil dihapus.');
+        }
+
+        abort(403, 'Anda tidak memiliki izin menghapus pesan ini.');
+    }
 }

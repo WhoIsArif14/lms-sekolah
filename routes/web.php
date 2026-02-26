@@ -51,6 +51,7 @@ Route::middleware('auth')->group(function () {
     // --- AREA DISKUSI (Bisa diakses Admin, Guru, Siswa) ---
     // Pindahkan ke sini agar semua role bisa POST komentar
     Route::post('/courses/{course}/discussion', [DiscussionController::class, 'store'])->name('discussions.store');
+    Route::delete('/discussion/{discussion}', [App\Http\Controllers\DiscussionController::class, 'destroy'])->name('discussions.destroy');
 
     // --- AREA KHUSUS ADMIN ---
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
