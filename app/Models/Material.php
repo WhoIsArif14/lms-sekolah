@@ -13,7 +13,7 @@ class Material extends Model
         'course_id',
         'title',
         'type',
-        'content',
+        'content'
     ];
 
     public function course()

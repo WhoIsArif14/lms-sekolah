@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('course_id')->constrained()->onDelete('cascade');
             $table->string('title');
-            $table->enum('type', ['file', 'video_link']);
-            $table->string('content');
+            $table->string('type'); // 'file' atau 'video'
+            $table->string('content'); // nama file atau link video
             $table->timestamps();
         });
     }

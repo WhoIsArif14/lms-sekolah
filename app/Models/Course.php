@@ -9,7 +9,15 @@ class Course extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'description', 'user_id'];
+    protected $fillable = [
+        'title',
+        'description',
+        'user_id',
+        'day',          // Tambahkan ini
+        'time_start',   // Tambahkan ini
+        'time_end',     // Tambahkan ini
+        'classroom'     // Tambahkan ini
+    ];
 
     // TAMBAHKAN INI: Relasi ke User (Guru)
     public function user()

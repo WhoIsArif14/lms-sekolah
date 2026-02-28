@@ -50,4 +50,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Course::class);
     }
+
+    // hubungan siswa dengan pengumpulan tugas
+    public function submissions()
+    {
+        return $this->hasMany(Submission::class);
+    }
 }

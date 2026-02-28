@@ -12,4 +12,9 @@ class Submission extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function assignment()
+    {
+        return $this->belongsTo(Assignment::class);
+    }
 }

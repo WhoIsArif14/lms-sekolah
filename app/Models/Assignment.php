@@ -8,8 +8,17 @@ class Assignment extends Model
 {
     protected $fillable = ['course_id', 'title', 'instruction', 'deadline'];
 
+    protected $casts = [
+        'deadline' => 'datetime',
+    ];
+
     public function submissions()
     {
         return $this->hasMany(Submission::class);
+    }
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
     }
 }

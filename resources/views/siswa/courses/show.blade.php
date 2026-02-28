@@ -45,6 +45,39 @@
                         <p class="text-center text-gray-500 py-10">Materi belum diunggah oleh guru.</p>
                     @endforelse
                 </div>
+
+                {{-- daftar tugas bagi siswa --}}
+                <div class="mt-8">
+                    <h3 class="text-lg font-bold mb-6 flex items-center">
+                        <span class="bg-green-400 w-2 h-6 rounded-full mr-3"></span>
+                        Tugas
+                    </h3>
+                    @forelse($assignments as $assignment)
+                        <div class="mb-6 p-4 border rounded-lg">
+                            <p class="font-bold text-gray-700">{{ $assignment->title }}</p>
+                            <p class="text-sm text-gray-600 mb-1">{{ $assignment->instruction }}</p>
+                            <p class="text-xs text-gray-500 mb-2">Deadline: {{ $assignment->deadline ? $assignment->deadline->format('d M Y H:i') : 'Tidak ditentukan' }}</p>
+
+                            @if(isset($submissions[$assignment->id]))
+                                <p class="text-green-600 font-semibold">Sudah dikumpulkan:</p>
+                                <a href="{{ asset('storage/'.$submissions[$assignment->id]->file_path) }}" class="text-blue-600 hover:underline" target="_blank">Unduh</a>
+                            @else
+                                <form action="{{ route('siswa.courses.assignments.submit', [$course, $assignment]) }}" method="POST" enctype="multipart/form-data" class="mt-2">
+                                    @csrf
+                                    <div class="flex items-center gap-2">
+                                        <input type="file" name="file" required class="text-sm text-gray-700">
+                                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">
+                                            Kirim
+                                        </button>
+                                    </div>
+                                </form>
+                            @endif
+                        </div>
+                    @empty
+                        <p class="text-gray-500 italic">Belum ada tugas yang diberikan guru.</p>
+                    @endforelse
+                </div>
+
                 @include('components.forum-diskusi')
             </div>
         </div>
