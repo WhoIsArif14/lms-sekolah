@@ -16,7 +16,8 @@
                 <x-side-nav-link :href="route('jadwal.index')" :active="request()->routeIs('jadwal.*')">
                     <div class="flex items-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         {{ __('Jadwal Online') }}
                     </div>
@@ -38,7 +39,7 @@
                     <x-side-nav-link :href="route('guru.courses.index')" :active="request()->routeIs('guru.courses.*')">
                         {{ __('Mata Pelajaran Saya') }}
                     </x-side-nav-link>
-                    <x-side-nav-link :href="route('guru.courses.index')" :active="request()->routeIs('guru.courses.*')">
+                    <x-side-nav-link :href="route('guru.assignments.index')" :active="request()->routeIs('guru.assignments.*')">
                         {{ __('Tugas') }}
                     </x-side-nav-link>
                 @endif
@@ -47,7 +48,7 @@
                     <x-side-nav-link :href="route('siswa.dashboard')" :active="request()->routeIs('siswa.dashboard')">
                         {{ __('Mata Pelajaran') }}
                     </x-side-nav-link>
-                    <x-side-nav-link :href="route('siswa.dashboard')" :active="request()->routeIs('siswa.dashboard')">
+                    <x-side-nav-link :href="route('siswa.assignments.index')" :active="request()->routeIs('siswa.assignments.*')">
                         {{ __('Tugas') }}
                     </x-side-nav-link>
                 @endif
@@ -126,7 +127,7 @@
                 <x-responsive-nav-link :href="route('guru.courses.index')" :active="request()->routeIs('guru.courses.*')">
                     {{ __('Mata Pelajaran Saya') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('guru.courses.index')" :active="request()->routeIs('guru.courses.*')">
+                <x-responsive-nav-link :href="route('guru.assignments.index')" :active="request()->routeIs('guru.assignments.*')">
                     {{ __('Tugas') }}
                 </x-responsive-nav-link>
             @endif
@@ -135,7 +136,7 @@
                 <x-responsive-nav-link :href="route('siswa.dashboard')" :active="request()->routeIs('siswa.dashboard')">
                     {{ __('Kursus Saya') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('siswa.dashboard')" :active="request()->routeIs('siswa.dashboard')">
+                <x-responsive-nav-link :href="route('siswa.assignments.index')" :active="request()->routeIs('siswa.assignments.*')">
                     {{ __('Tugas') }}
                 </x-responsive-nav-link>
             @endif

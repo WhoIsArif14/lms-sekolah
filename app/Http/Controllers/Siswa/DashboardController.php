@@ -18,42 +18,57 @@ class DashboardController extends Controller
 
     public function show(Course $course)
     {
-        // Melihat detail materi di dalam kursus
-        $materials = $course->materials()->latest()->get();
+        // Mengambil materi dan tugas yang terkait dengan kursus ini
+        $course->load(['materials', 'assignments.submissions' => function ($query) {
+            $query->where('user_id', auth()->id());
+        }]);
 
-        // ambil tugas dan majukan pengumpulan siswa saat ini
-        $assignments = $course->assignments()->latest()->get();
-
-        $user = auth()->user();
-        $submissions = $user->submissions()
-            ->whereIn('assignment_id', $assignments->pluck('id'))
-            ->get()
-            ->keyBy('assignment_id');
-
-        return view('siswa.courses.show', compact('course', 'materials', 'assignments', 'submissions'));
+        return view('siswa.courses.show', compact('course'));
     }
 
-    // siswa mengirimkan file untuk tugas tertentu
-    public function submitAssignment(Request $request, Course $course, Assignment $assignment)
+    public function submitAssignment(Request $request, Assignment $assignment)
     {
-        // pastikan kursus sesuai agar tidak mengirim ke tugas lain
-        if ($assignment->course_id !== $course->id) {
-            abort(404);
-        }
-
-        $validated = $request->validate([
-            'file' => 'required|file|mimes:pdf,doc,docx,zip|max:10240',
+        $request->validate([
+            'file_jawaban' => 'required|mimes:pdf,doc,docx,zip,jpg,png|max:5120',
         ]);
 
-        $path = $request->file('file')->store('submissions', 'public');
+        $path = $request->file('file_jawaban')->store('submissions', 'public');
 
-        $user = auth()->user();
-        // hapus pengumpulan sebelumnya bila ada (overwrite)
-        $user->submissions()->updateOrCreate(
-            ['assignment_id' => $assignment->id],
+        \App\Models\Submission::updateOrCreate(
+            ['assignment_id' => $assignment->id, 'user_id' => auth()->id()],
             ['file_path' => $path]
         );
 
         return back()->with('success', 'Tugas berhasil dikirim!');
+    }
+
+    public function indexAssignments()
+    {
+        // Mengambil semua tugas yang tersedia untuk siswa
+        $assignments = \App\Models\Assignment::with('course')->get();
+
+        return view('siswa.assignments.index', compact('assignments'));
+    }
+
+    public function storeAttendance()
+    {
+        $today = now()->format('Y-m-d');
+        $userId = auth()->id();
+
+        // Cek apakah siswa sudah absen hari ini (Global)
+        $alreadyPresent = \App\Models\Attendance::where('user_id', $userId)
+            ->where('attendance_date', $today)
+            ->exists();
+
+        if ($alreadyPresent) {
+            return back()->with('info', 'Anda sudah melakukan absensi harian.');
+        }
+
+        \App\Models\Attendance::create([
+            'user_id' => $userId,
+            'attendance_date' => $today,
+        ]);
+
+        return back()->with('success', 'Berhasil mencatat kehadiran hari ini!');
     }
 }

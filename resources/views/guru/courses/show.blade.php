@@ -85,13 +85,16 @@
             </div>
 
             {{-- assignment form --}}
-            <div x-show="showAssignForm" x-transition class="bg-white p-6 rounded-lg shadow-md mb-6 border border-gray-200">
+            <div x-show="showAssignForm" x-transition
+                class="bg-white p-6 rounded-lg shadow-md mb-6 border border-gray-200">
                 <form action="{{ route('guru.courses.assignments.store', $course) }}" method="POST">
                     @csrf
                     <div class="grid grid-cols-1 gap-6">
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-2">Judul Tugas</label>
-                            <input type="text" name="title" class="w-full rounded-lg border-gray-300 focus:ring-indigo-500" placeholder="Contoh: Soal Bab 1" required>
+                            <input type="text" name="title"
+                                class="w-full rounded-lg border-gray-300 focus:ring-indigo-500"
+                                placeholder="Contoh: Soal Bab 1" required>
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-2">Instruksi</label>
@@ -99,11 +102,13 @@
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-2">Deadline (opsional)</label>
-                            <input type="datetime-local" name="deadline" class="w-full rounded-lg border-gray-300 focus:ring-indigo-500">
+                            <input type="datetime-local" name="deadline"
+                                class="w-full rounded-lg border-gray-300 focus:ring-indigo-500">
                         </div>
                     </div>
                     <div class="mt-6">
-                        <button type="submit" class="bg-yellow-500 text-white px-6 py-2 rounded-lg font-bold hover:bg-yellow-600 shadow-md transition">
+                        <button type="submit"
+                            class="bg-yellow-500 text-white px-6 py-2 rounded-lg font-bold hover:bg-yellow-600 shadow-md transition">
                             Simpan Tugas
                         </button>
                     </div>
@@ -160,14 +165,17 @@
                     <div class="mb-4 p-4 border rounded-lg">
                         <p class="font-bold text-gray-700">{{ $assignment->title }}</p>
                         <p class="text-sm text-gray-600 mb-1">{{ $assignment->instruction }}</p>
-                        <p class="text-xs text-gray-500 mb-2">Deadline: {{ $assignment->deadline ? $assignment->deadline->format('d M Y H:i') : 'Tidak ditentukan' }}</p>
+                        <p class="text-xs text-gray-500 mb-2">Deadline:
+                            {{ $assignment->deadline ? $assignment->deadline->format('d M Y H:i') : 'Tidak ditentukan' }}
+                        </p>
                         <p class="text-sm font-semibold">Pengumpulan: {{ $assignment->submissions->count() }}</p>
-                        @if($assignment->submissions->isNotEmpty())
+                        @if ($assignment->submissions->isNotEmpty())
                             <ul class="mt-2 list-disc pl-5 space-y-1">
-                                @foreach($assignment->submissions as $sub)
+                                @foreach ($assignment->submissions as $sub)
                                     <li>
-                                        {{ $sub->user->name }} - 
-                                        <a href="{{ asset('storage/'.$sub->file_path) }}" target="_blank" class="text-blue-600 hover:underline">
+                                        {{ $sub->user->name }} -
+                                        <a href="{{ asset('storage/' . $sub->file_path) }}" target="_blank"
+                                            class="text-blue-600 hover:underline">
                                             unduh
                                         </a>
                                     </li>

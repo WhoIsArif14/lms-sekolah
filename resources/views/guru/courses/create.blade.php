@@ -23,13 +23,6 @@
                             placeholder="Jelaskan apa yang akan dipelajari di kursus ini..." required></textarea>
                     </div>
 
-                    <div class="flex items-center justify-end space-x-4">
-                        <a href="{{ route('guru.courses.index') }}" class="text-gray-500 hover:underline">Batal</a>
-                        <button type="submit"
-                            class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-indigo-700 shadow-lg">
-                            Simpan & Publikasikan
-                        </button>
-                    </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Hari</label>
@@ -55,6 +48,14 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Jam Selesai</label>
                             <input type="time" name="time_end" class="w-full rounded-md border-gray-300 shadow-sm">
+                        </div>
+
+                        <div class="flex items-center justify-end space-x-4">
+                            <a href="{{ route('guru.courses.index') }}" class="text-gray-500 hover:underline">Batal</a>
+                            <button type="submit"
+                                class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-indigo-700 shadow-lg">
+                                Simpan & Publikasikan
+                            </button>
                         </div>
                     </div>
                 </form>
