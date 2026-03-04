@@ -10,38 +10,6 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div class="lg:col-span-2 space-y-6">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6">
-                        <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Kehadiran</h4>
-
-                        @php
-                            $isAbsen = \App\Models\Attendance::where('user_id', auth()->id())
-                                ->where('course_id', $course->id)
-                                ->where('attendance_date', now()->format('Y-m-d'))
-                                ->exists();
-                        @endphp
-
-                        @if ($isAbsen)
-                            <div
-                                class="flex items-center justify-center p-3 bg-green-50 text-green-700 rounded-xl border border-green-100 font-bold text-sm">
-                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path
-                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z">
-                                    </path>
-                                </svg>
-                                Sudah Absen Hari Ini
-                            </div>
-                        @else
-                            <form action="{{ route('siswa.courses.attendance', $course->id) }}" method="POST">
-                                @csrf
-                                <button type="submit"
-                                    class="w-full bg-indigo-600 text-white py-3 rounded-xl font-black text-sm hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition transform active:scale-95">
-                                    ✋ KLIK UNTUK ABSEN
-                                </button>
-                            </form>
-                            <p class="text-[10px] text-gray-400 mt-2 text-center">Pastikan kamu absen sesuai jadwal
-                                pelajaran.</p>
-                        @endif
-                    </div>
 
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                         <h3 class="text-xl font-bold mb-4 flex items-center">

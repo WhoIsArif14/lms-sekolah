@@ -14,8 +14,17 @@ return new class extends Migration
         Schema::create('attendances', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('course_id')->constrained()->onDelete('cascade');
-            $table->date('attendance_date'); // Mencatat tanggal hari ini
+
+            // Hapus course_id karena absen sekarang bersifat harian (global)
+            $table->date('attendance_date');
+
+            // Tambahkan status untuk membedakan kehadiran
+            $table->enum('status', ['hadir', 'izin', 'sakit'])->default('hadir');
+
+            // Tambahkan kolom untuk alasan dan file surat
+            $table->text('note')->nullable(); // Alasan jika izin/sakit
+            $table->string('attachment')->nullable(); // Nama file surat izin
+
             $table->timestamps();
         });
     }

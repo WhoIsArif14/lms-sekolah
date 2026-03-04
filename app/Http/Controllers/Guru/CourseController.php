@@ -20,7 +20,8 @@ class CourseController extends Controller
 
     public function create()
     {
-        return view('guru.courses.create');
+        $classes = \App\Models\SchoolClass::all(); // Ambil semua kelas buatan Admin
+        return view('guru.courses.create', compact('classes'));
     }
 
     public function store(Request $request)

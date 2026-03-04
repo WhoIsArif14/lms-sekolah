@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DiscussionController;
 use App\Http\Controllers\ScheduleController;
@@ -13,6 +14,8 @@ use App\Http\Controllers\Guru\CourseController as GuruCourse;
 use App\Http\Controllers\Admin\UserController as AdminUser;
 use App\Http\Controllers\Admin\CourseController as AdminCourse;
 use App\Http\Controllers\Siswa\DashboardController as SiswaDashboard;
+use App\Http\Controllers\Admin\AttendanceController as AdminAttendance;
+use App\Http\Controllers\Admin\ClassController as ClassController;
 
 // Import Models
 use App\Models\User;
@@ -26,9 +29,9 @@ Route::get('/', function () {
  * Route Dashboard Utama (Auto-Redirect berdasarkan Role)
  */
 Route::get('/dashboard', function () {
-    if (!auth()->check()) return redirect()->route('login');
+    if (!Auth::check()) return redirect()->route('login');
 
-    return match (auth()->user()->role) {
+    return match (Auth::user()->role) {
         'admin' => redirect()->route('admin.dashboard'),
         'guru'  => redirect()->route('guru.dashboard'),
         'siswa' => redirect()->route('siswa.dashboard'),
@@ -57,6 +60,15 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('users', AdminUser::class);
         Route::resource('courses', AdminCourse::class)->only(['index', 'destroy']);
+        Route::get('/attendance', [AdminAttendance::class, 'index'])->name('attendance.index');
+        Route::post('/attendance/update', [AdminAttendance::class, 'updateSetting'])->name('attendance.update');
+        Route::get('/attendance/classes', [AdminAttendance::class, 'index'])->name('attendance.classes');
+        Route::get('/attendance/classes/{id}', [AdminAttendance::class, 'showClass'])->name('attendance.class');
+
+        // Menu Manajemen Kelas
+        Route::get('/classes', [ClassController::class, 'index'])->name('classes.index');
+        Route::post('/classes', [ClassController::class, 'store'])->name('classes.store');
+        Route::delete('/classes/{class}', [ClassController::class, 'destroy'])->name('classes.destroy');
     });
 
     // --- AREA KHUSUS GURU ---
@@ -80,10 +92,10 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['role:siswa'])->prefix('siswa')->name('siswa.')->group(function () {
         Route::get('/dashboard', [SiswaDashboard::class, 'index'])->name('dashboard');
         Route::get('/courses/{course}', [SiswaDashboard::class, 'show'])->name('courses.show');
+        Route::get('/attendance', [SiswaDashboard::class, 'attendanceIndex'])->name('attendance.index');
+        Route::post('/attendance/store', [SiswaDashboard::class, 'storeAttendance'])->name('attendance.store');
         Route::get('/assignments', [SiswaDashboard::class, 'indexAssignments'])->name('assignments.index');
-
         Route::post('/assignments/{assignment}/submit', [SiswaDashboard::class, 'submitAssignment'])->name('assignments.submit');
-        Route::post('/attendance/global', [SiswaDashboard::class, 'storeAttendance'])->name('attendance.store');
     });
 
     // --- AREA PROFILE ---

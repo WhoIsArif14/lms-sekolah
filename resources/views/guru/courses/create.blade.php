@@ -36,10 +36,17 @@
                                 <option value="Sabtu">Sabtu</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Kelas</label>
-                            <input type="text" name="classroom" placeholder="Contoh: X-RPL-A"
-                                class="w-full rounded-md border-gray-300 shadow-sm">
+                        <div class="mb-4">
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Pilih Kelas</label>
+                            <select name="school_class_id"
+                                class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500">
+                                <option value="">-- Pilih Kelas --</option>
+                                @foreach ($classes as $class)
+                                    <option value="{{ $class->id }}">
+                                        Kelas {{ $class->level }} - {{ $class->name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Jam Mulai</label>

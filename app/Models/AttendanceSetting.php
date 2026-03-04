@@ -5,16 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Attendance extends Model
+class AttendanceSetting extends Model
 {
     use HasFactory;
 
-    // Tambahkan baris ini
     protected $fillable = [
-        'user_id',
-        'attendance_date',
-        'status',
-        'note',
-        'attachment'
+        'start_time',
+        'end_time',
+        'is_open',
+        'latitude',
+        'longitude',
+        'radius_meters'
     ];
 }

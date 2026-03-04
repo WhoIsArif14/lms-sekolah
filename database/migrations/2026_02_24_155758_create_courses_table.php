@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description');
             $table->string('thumbnail')->nullable();
+            $table->foreignId('school_class_id')->constrained('school_classes')->onDelete('cascade');
             $table->timestamps();
         });
     }

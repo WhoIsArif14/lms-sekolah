@@ -33,6 +33,14 @@
                     <x-side-nav-link :href="route('admin.courses.index')" :active="request()->routeIs('admin.courses.*')">
                         {{ __('Monitoring Kursus') }}
                     </x-side-nav-link>
+
+                    <x-side-nav-link :href="route('admin.attendance.index')" :active="request()->routeIs('admin.attendance.*')">
+                        {{ __('Presensi') }}
+                    </x-side-nav-link>
+
+                    <x-side-nav-link :href="route('admin.classes.index')" :active="request()->routeIs('admin.classes.*')">
+                        {{ __('Manajemen Kelas') }}
+                    </x-side-nav-link>
                 @endif
 
                 @if (Auth::user()->role === 'guru')
@@ -50,6 +58,9 @@
                     </x-side-nav-link>
                     <x-side-nav-link :href="route('siswa.assignments.index')" :active="request()->routeIs('siswa.assignments.*')">
                         {{ __('Tugas') }}
+                    </x-side-nav-link>
+                    <x-side-nav-link :href="route('siswa.attendance.index')" :active="request()->routeIs('siswa.attendance.*')">
+                        {{ __('Presensi') }}
                     </x-side-nav-link>
                 @endif
             </nav>
@@ -138,6 +149,9 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('siswa.assignments.index')" :active="request()->routeIs('siswa.assignments.*')">
                     {{ __('Tugas') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('siswa.attendance.index')" :active="request()->routeIs('siswa.attendance.*')">
+                    {{ __('Presensi') }}
                 </x-responsive-nav-link>
             @endif
 

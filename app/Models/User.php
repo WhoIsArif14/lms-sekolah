@@ -56,4 +56,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Submission::class);
     }
+
+    /**
+     * Relationship: Siswa memiliki satu kelas
+     */
+    public function schoolClass()
+    {
+        return $this->belongsTo(SchoolClass::class, 'school_class_id');
+    }
 }
