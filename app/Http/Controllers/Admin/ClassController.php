@@ -4,30 +4,52 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SchoolClass;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ClassController extends Controller
 {
+    // Halaman daftar kelas (Manajemen Kelas)
     public function index()
     {
-        $classes = SchoolClass::orderBy('grade', 'asc')->get();
+        $classes = SchoolClass::withCount('students')->get();
         return view('admin.classes.index', compact('classes'));
     }
 
-    public function store(Request $request)
+    public function show($id)
     {
-        $request->validate([
-            'grade' => 'required', // Contoh: 10, 11, 12
-            'name' => 'required',  // Contoh: IPA 1, Merdeka A
-        ]);
-
-        SchoolClass::create($request->all());
-        return back()->with('success', 'Kelas berhasil ditambahkan!');
+        $class = SchoolClass::findOrFail($id);
+        $students = User::where('school_class_id', $id)->get();
+        return view('admin.classes.show', compact('class', 'students'));
     }
 
-    public function destroy(SchoolClass $class)
+    // Fungsi Proses Import
+    public function importSiswa(Request $request, $classId)
     {
-        $class->delete();
-        return back()->with('success', 'Kelas berhasil dihapus!');
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048'
+        ]);
+
+        $file = $request->file('file');
+        $spreadsheet = IOFactory::load($file->getRealPath());
+        $data = $spreadsheet->getActiveSheet()->toArray();
+
+        foreach ($data as $index => $row) {
+            if ($index == 0) continue; // Lewati baris header (Nama, Email, dll)
+
+            if (!empty($row[0]) && !empty($row[1])) {
+                User::create([
+                    'name'            => $row[0], // Kolom A: Nama
+                    'email'           => $row[1], // Kolom B: Email
+                    'password'        => Hash::make($row[2] ?? 'password123'), // Kolom C: Pass
+                    'role'            => 'siswa',
+                    'school_class_id' => $classId, // Otomatis masuk ke kelas ini
+                ]);
+            }
+        }
+
+        return back()->with('success', 'Data siswa berhasil diimpor ke kelas!');
     }
 }

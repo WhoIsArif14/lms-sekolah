@@ -17,13 +17,13 @@ class AttendanceController extends Controller
     }
 
     // 2. Lihat Daftar Siswa di Kelas Tertentu & Status Absen Hari Ini
-    public function showClass($classId)
+    public function showClass($id)
     {
-        $class = SchoolClass::findOrFail($classId);
+        $class = SchoolClass::findOrFail($id);
         $today = now()->format('Y-m-d');
 
-        // Ambil semua siswa di kelas ini beserta absennya hari ini
-        $students = User::where('class_id', $classId)
+        // Ganti 'class_id' menjadi 'school_class_id'
+        $students = User::where('school_class_id', $id)
             ->where('role', 'siswa')
             ->with(['attendances' => function ($query) use ($today) {
                 $query->where('attendance_date', $today);
