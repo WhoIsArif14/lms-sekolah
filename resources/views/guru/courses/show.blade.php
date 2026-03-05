@@ -34,6 +34,10 @@
                     class="bg-yellow-500 text-white px-4 py-2 rounded-lg font-bold shadow hover:bg-yellow-600 transition">
                     <span x-text="showAssignForm ? '- Batalkan' : '+ Tambah Tugas'"></span>
                 </button>
+                <a href="{{ route('guru.exams.index', $course->id) }}"
+                    class="bg-amber-500 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-sm hover:bg-amber-600">
+                    KELOLA UJIAN
+                </a>
             </div>
 
             <div x-show="showForm" x-transition class="bg-white p-6 rounded-lg shadow-md mb-6 border border-gray-200">

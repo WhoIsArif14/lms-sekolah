@@ -18,7 +18,7 @@ class DashboardController extends Controller
 
         // Hanya tampilkan mapel yang school_class_id nya cocok dengan milik siswa
         $courses = \App\Models\Course::where('school_class_id', $user->school_class_id)
-            ->with('guru')
+            ->with('user')
             ->get();
 
         return view('siswa.dashboard', compact('courses'));

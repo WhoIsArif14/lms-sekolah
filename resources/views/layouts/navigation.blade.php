@@ -50,6 +50,9 @@
                     <x-side-nav-link :href="route('guru.assignments.index')" :active="request()->routeIs('guru.assignments.*')">
                         {{ __('Tugas') }}
                     </x-side-nav-link>
+                    <x-side-nav-link :href="route('guru.courses.index')" :active="request()->routeIs('guru.exams.*')">
+                        {{ __('Ujian Online') }}
+                    </x-side-nav-link>
                 @endif
 
                 @if (Auth::user()->role === 'siswa')
@@ -61,6 +64,12 @@
                     </x-side-nav-link>
                     <x-side-nav-link :href="route('siswa.attendance.index')" :active="request()->routeIs('siswa.attendance.*')">
                         {{ __('Presensi') }}
+                    </x-side-nav-link>
+                @endif
+
+                @if (Auth::user()->role == 'ortu')
+                    <x-side-nav-link :href="route('ortu.dashboard')" :active="request()->routeIs('ortu.*')">
+                        {{ __('Anak Saya') }}
                     </x-side-nav-link>
                 @endif
             </nav>
@@ -141,6 +150,9 @@
                 <x-responsive-nav-link :href="route('guru.assignments.index')" :active="request()->routeIs('guru.assignments.*')">
                     {{ __('Tugas') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('guru.courses.index')" :active="request()->routeIs('guru.exams.*')">
+                    {{ __('Ujian Online') }}
+                </x-responsive-nav-link>
             @endif
 
             @if (Auth::user()->role === 'siswa')
@@ -152,6 +164,12 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('siswa.attendance.index')" :active="request()->routeIs('siswa.attendance.*')">
                     {{ __('Presensi') }}
+                </x-responsive-nav-link>
+            @endif
+
+            @if (Auth::user()->role == 'ortu')
+                <x-responsive-nav-link :href="route('ortu.dashboard')" :active="request()->routeIs('ortu.*')">
+                    {{ __('Anak Saya') }}
                 </x-responsive-nav-link>
             @endif
 

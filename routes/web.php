@@ -16,13 +16,43 @@ use App\Http\Controllers\Admin\CourseController as AdminCourse;
 use App\Http\Controllers\Siswa\DashboardController as SiswaDashboard;
 use App\Http\Controllers\Admin\AttendanceController as AdminAttendance;
 use App\Http\Controllers\Admin\ClassController as ClassController;
+use App\Http\Controllers\Guru\ExamController as ExamController;
+use App\Http\Controllers\Siswa\ExamController as SiswaExamController;
+use App\Http\Controllers\Ortu\ParentController as ParentController;
 
 // Import Models
 use App\Models\User;
 use App\Models\Course;
 
 Route::get('/', function () {
-    return view('welcome');
+    // metrics untuk halaman utama (belum diautentikasi)
+    // rata‑rata skor ujian seluruh siswa
+    $avgAcademic = \App\Models\ExamResponse::query()->avg('score') ?: 0;
+
+    // tingkat kehadiran: persentase record dengan status "present"
+    $totalAttendance = \App\Models\Attendance::count();
+    $presentCount = $totalAttendance
+        ? \App\Models\Attendance::where('status', 'present')->count()
+        : 0;
+    $attendanceRate = $totalAttendance ? ($presentCount / $totalAttendance) * 100 : 0;
+
+    // jumlah siswa dengan nilai di bawah KKM (anggap KKM = 75)
+    $kkm = 75;
+    $lowScoreCount = \App\Models\ExamResponse::where('score', '<', $kkm)
+                        ->distinct('user_id')
+                        ->count();
+
+    // jumlah siswa yang sering absen (paling sederhana: pernah absen)
+    $lowAttendanceCount = \App\Models\Attendance::where('status', '!=', 'present')
+                            ->distinct('user_id')
+                            ->count();
+
+    return view('welcome', compact(
+        'avgAcademic',
+        'attendanceRate',
+        'lowScoreCount',
+        'lowAttendanceCount'
+    ));
 });
 
 /**
@@ -90,6 +120,12 @@ Route::middleware('auth')->group(function () {
         Route::resource('assignments', AssignmentController::class);
         // Rute khusus jika Guru ingin buat tugas LANGSUNG dari dalam halaman detail Kursus
         Route::post('/courses/{course}/assignments', [AssignmentController::class, 'store'])->name('courses.assignments.store');
+
+        Route::get('/course/{courseId}/exams', [ExamController::class, 'index'])->name('exams.index');
+        Route::post('/course/{courseId}/exams', [ExamController::class, 'store'])->name('exams.store');
+        Route::get('/exams/{id}', [ExamController::class, 'show'])->name('exams.show');
+        Route::post('/exams/{id}/questions', [ExamController::class, 'storeQuestion'])->name('exams.questions.store');
+        Route::post('/exams/{id}/toggle', [ExamController::class, 'toggleStatus'])->name('exams.toggle');
     });
 
     // --- AREA KHUSUS SISWA ---
@@ -100,6 +136,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/attendance/store', [SiswaDashboard::class, 'storeAttendance'])->name('attendance.store');
         Route::get('/assignments', [SiswaDashboard::class, 'indexAssignments'])->name('assignments.index');
         Route::post('/assignments/{assignment}/submit', [SiswaDashboard::class, 'submitAssignment'])->name('assignments.submit');
+        Route::post('/exams/{id}/submit', [SiswaExamController::class, 'submit'])->name('siswa.exams.submit');
+        Route::post('/exams/{id}/submit', [SiswaExamController::class, 'submit'])->name('exams.submit');
     });
 
     // --- AREA PROFILE ---
@@ -107,6 +145,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', 'edit')->name('profile.edit');
         Route::patch('/profile', 'update')->name('profile.update');
         Route::delete('/profile', 'destroy')->name('profile.destroy');
+    });
+
+    Route::middleware(['auth', 'role:ortu'])->prefix('ortu')->name('ortu.')->group(function () {
+        Route::get('/dashboard', [ParentController::class, 'index'])->name('dashboard');
+        Route::get('/child/{id}', [ParentController::class, 'showChildActivity'])->name('child.detail');
     });
 });
 
