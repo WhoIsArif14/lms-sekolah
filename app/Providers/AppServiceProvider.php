@@ -17,12 +17,12 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    {
-        // pastikan tautan storage/public dibuat secara otomatis pada saat aplikasi di-boot
-        // sehingga file yang diunggah ke disk "public" dapat diakses melalui url asset('storage/...).
-        if (!\Illuminate\Support\Facades\File::exists(public_path('storage'))) {
-            \Illuminate\Support\Facades\Artisan::call('storage:link');
-        }
-    }
+    // public function boot(): void
+    // {
+    //     // pastikan tautan storage/public dibuat secara otomatis pada saat aplikasi di-boot
+    //     // sehingga file yang diunggah ke disk "public" dapat diakses melalui url asset('storage/...).
+    //     if (!\Illuminate\Support\Facades\File::exists(public_path('storage'))) {
+    //         \Illuminate\Support\Facades\Artisan::call('storage:link');
+    //     }
+    // }
 }

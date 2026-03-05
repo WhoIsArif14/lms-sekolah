@@ -13,6 +13,7 @@ use App\Http\Controllers\Guru\DashboardController as GuruDashboard;
 use App\Http\Controllers\Guru\CourseController as GuruCourse;
 use App\Http\Controllers\Admin\UserController as AdminUser;
 use App\Http\Controllers\Admin\CourseController as AdminCourse;
+use App\Http\Controllers\Admin\ImportController as ImportController;
 use App\Http\Controllers\Siswa\DashboardController as SiswaDashboard;
 use App\Http\Controllers\Admin\AttendanceController as AdminAttendance;
 use App\Http\Controllers\Admin\ClassController as ClassController;
@@ -103,6 +104,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/admin/classes/{id}/import', [ClassController::class, 'importSiswa'])->name('admin.classes.import');
         Route::get('/classes/{id}', [ClassController::class, 'show'])->name('classes.show');
         Route::post('/classes/{id}/import', [ClassController::class, 'importSiswa'])->name('classes.import');
+
+        // Menu Import Data
+        Route::get('/imports', [ImportController::class, 'index'])->name('imports.index');
+        Route::post('/imports/students', [ImportController::class, 'importStudents'])->name('imports.students');
+        Route::post('/imports/parents', [ImportController::class, 'importParents'])->name('imports.parents');
+        Route::get('/imports/template/students', [ImportController::class, 'downloadStudentTemplate'])->name('imports.template.students');
+        Route::get('/imports/template/parents', [ImportController::class, 'downloadParentTemplate'])->name('imports.template.parents');
     });
 
     // --- AREA KHUSUS GURU ---

@@ -8,7 +8,7 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Illuminate\Support\Facades\Hash;
 
-class StudentsImport implements ToModel, WithHeadingRow, SkipsEmptyRows
+class ParentsImport implements ToModel, WithHeadingRow, SkipsEmptyRows
 {
     /**
      * @param array $row
@@ -29,13 +29,10 @@ class StudentsImport implements ToModel, WithHeadingRow, SkipsEmptyRows
         }
 
         return new User([
-            'name'      => $row['name'] ?? null,
-            'email'     => $row['email'] ?? null,
-            'password'  => Hash::make($row['password'] ?? 'Password123!'),
-            'role'      => 'siswa',
-            'parent_id' => isset($row['parent_email'])
-                ? User::where('email', $row['parent_email'])->where('role', 'ortu')->first()?->id
-                : null,
+            'name'     => $row['name'] ?? null,
+            'email'    => $row['email'] ?? null,
+            'password' => Hash::make($row['password'] ?? 'Password123!'),
+            'role'     => 'ortu',
         ]);
     }
 }
