@@ -39,13 +39,13 @@ Route::get('/', function () {
     // jumlah siswa dengan nilai di bawah KKM (anggap KKM = 75)
     $kkm = 75;
     $lowScoreCount = \App\Models\ExamResponse::where('score', '<', $kkm)
-                        ->distinct('user_id')
-                        ->count();
+        ->distinct('user_id')
+        ->count();
 
     // jumlah siswa yang sering absen (paling sederhana: pernah absen)
     $lowAttendanceCount = \App\Models\Attendance::where('status', '!=', 'present')
-                            ->distinct('user_id')
-                            ->count();
+        ->distinct('user_id')
+        ->count();
 
     return view('welcome', compact(
         'avgAcademic',
