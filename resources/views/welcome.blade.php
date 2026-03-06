@@ -84,7 +84,7 @@
                     Sistem Pembelajaran Online
                 </h1>
                 <p class="text-blue-100 text-xl font-medium leading-relaxed max-w-lg">
-                    Platform LMS cerdas untuk mendukung transisi digital sekolah Anda dengan fitur analisis real-time
+                    Platform LMS cerdas untuk mendukung transisi digital SMKN 1 Jatirejo dengan fitur analisis real-time
                     dan monitoring orang tua.
                 </p>
                 <div class="flex flex-wrap gap-4">

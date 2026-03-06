@@ -99,4 +99,19 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index', ['tab' => $user->role])->with('success', 'Data user berhasil diperbarui!');
     }
+
+    public function destroy(User $user)
+    {
+        // Prevent deleting self
+        if ($user->id === auth()->id()) {
+            return redirect()->back()->with('error', 'Tidak dapat menghapus akun sendiri!');
+        }
+
+        // Optional: Check if user has children (for parents) or other relations
+        // For now, just delete - Laravel will handle foreign key constraints if set
+
+        $user->delete();
+
+        return redirect()->route('admin.users.index', ['tab' => $user->role])->with('success', 'User berhasil dihapus!');
+    }
 }
