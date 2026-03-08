@@ -86,7 +86,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/dashboard', function () {
-            $count_guru = User::where('role', 'teacher')->count(); // Sesuaikan role 'teacher' atau 'guru'
+            $count_guru = User::where('role', 'guru')->count(); // Sesuaikan role 'teacher' atau 'guru'
             $count_siswa = User::where('role', 'siswa')->count();
             $count_course = Course::count();
             return view('admin.dashboard', compact('count_guru', 'count_siswa', 'count_course'));
