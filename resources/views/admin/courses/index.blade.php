@@ -21,7 +21,7 @@
                         @foreach($courses as $course)
                         <tr class="border-b text-sm">
                             <td class="px-4 py-2 font-bold">{{ $course->title }}</td>
-                            <td class="px-4 py-2">{{ $course->teacher->name }}</td>
+                            <td class="px-4 py-2">{{ $course->teacher?->name ?? 'Tidak ada guru' }}</td>
                             <td class="px-4 py-2">{{ $course->created_at->format('d M Y') }}</td>
                             <td class="px-4 py-2">
                                 <form action="{{ route('admin.courses.destroy', $course) }}" method="POST" onsubmit="return confirm('Hapus kursus ini?')">

@@ -11,7 +11,8 @@ class Assignment extends Model
         'title',
         'instruction',
         'deadline',
-        'file_path'
+        'link',
+        'file_path',
     ];
 
     protected $casts = [

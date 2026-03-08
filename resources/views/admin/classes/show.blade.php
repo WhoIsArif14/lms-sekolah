@@ -15,12 +15,17 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <h3 class="font-black text-gray-800 uppercase text-xs mb-4 flex items-center gap-2">
-                        <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
-                        </svg>
-                        Import Siswa via Excel/CSV
+                    <h3 class="font-black text-gray-800 uppercase text-xs mb-4 flex items-center justify-between">
+                        <span class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                            </svg>
+                            Import Siswa via Excel/CSV
+                        </span>
+                        <a href="{{ route('admin.classes.template.students', $class->id) }}"
+                            class="text-xs text-indigo-600 hover:underline">Download Template</a>
                     </h3>
                     <form action="{{ route('admin.classes.import.siswa', $class->id) }}" method="POST"
                         enctype="multipart/form-data" class="space-y-4">

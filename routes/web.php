@@ -105,6 +105,8 @@ Route::middleware('auth')->group(function () {
         // import siswa/ortu per kelas
         Route::post('/classes/{id}/import', [ClassController::class, 'importSiswa'])->name('classes.import.siswa');
         Route::post('/classes/{id}/import-parents', [ClassController::class, 'importParents'])->name('classes.import.parents');
+        // download template impor siswa per kelas
+        Route::get('/classes/{id}/template/students', [ClassController::class, 'downloadStudentTemplate'])->name('classes.template.students');
 
         Route::get('/classes/{id}', [ClassController::class, 'show'])->name('classes.show');
 

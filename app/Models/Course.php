@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Course extends Model
 {
@@ -50,5 +51,12 @@ class Course extends Model
     public function exams()
     {
         return $this->hasMany(Exam::class);
+    }
+
+    public function teacher(): BelongsTo
+    {
+        // Pastikan nama foreign key di tabel courses adalah 'teacher_id'
+        // Jika namanya berbeda, ubah parameter kedua di bawah
+        return $this->belongsTo(User::class, 'teacher_id');
     }
 }

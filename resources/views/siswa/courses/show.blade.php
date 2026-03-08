@@ -63,7 +63,7 @@
                                 <div class="flex justify-between items-start">
                                     <div>
                                         <h4 class="font-bold text-lg text-gray-800">{{ $assignment->title }}</h4>
-                                        <p class="text-sm text-gray-500 mb-3">{{ $assignment->instructions }}</p>
+                                        <p class="text-sm text-gray-500 mb-3">{{ $assignment->instruction }}</p>
 
                                         @if ($assignment->file_path)
                                             <a href="{{ asset('storage/' . $assignment->file_path) }}"
