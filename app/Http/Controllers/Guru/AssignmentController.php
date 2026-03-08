@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Assignment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AssignmentController extends Controller
 {
@@ -27,13 +28,17 @@ class AssignmentController extends Controller
     }
 
     // Pastikan parameter Course $course ada di sini
-    public function store(Request $request, Course $course)
+    public function store(Request $request)
     {
         $validated = $request->validate([
+            'course_id' => 'required|exists:courses,id',
             'title' => 'required|string|max:255',
             'instruction' => 'required|string',
             'deadline' => 'nullable|date',
         ]);
+
+        $course = Course::find($validated['course_id']);
+        unset($validated['course_id']); // Remove course_id from validated data since it's not a fillable field in Assignment
 
         // Ini akan otomatis mengisi course_id
         $course->assignments()->create($validated);
@@ -41,17 +46,11 @@ class AssignmentController extends Controller
         return redirect()->back()->with('success', 'Tugas berhasil ditambahkan!');
     }
 
-    public function destroy(Assignment $assignment)
-    {
-        $assignment->delete();
-        return redirect()->back()->with('success', 'Tugas berhasil dihapus!');
-    }
-
     public function update(Request $request, Assignment $assignment)
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'instructions' => 'required',
+            'instruction' => 'required',
             'deadline' => 'required|date',
             'file_soal' => 'nullable|mimes:pdf,doc,docx,zip|max:5120',
         ]);

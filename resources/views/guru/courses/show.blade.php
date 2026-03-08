@@ -31,7 +31,7 @@
                     TAMBAH MATERI
                 </button>
 
-                <button @click="showAssignForm = !showAssignForm; showForm = false"
+                <a href="{{ route('guru.assignments.index', $course->id) }}"
                     class="bg-yellow-500 text-gray-900 px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-yellow-600 transition transform active:scale-95 flex items-center justify-center text-sm uppercase tracking-wider">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
                     TAMBAH TUGAS
@@ -83,7 +83,7 @@
                 </form>
             </div>
 
-            <div x-show="showAssignForm" x-transition class="bg-white p-8 rounded-2xl shadow-md mb-8 border border-gray-200">
+            {{-- <div x-show="showAssignForm" x-transition class="bg-white p-8 rounded-2xl shadow-md mb-8 border border-gray-200">
                 <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
                     <span class="p-2 bg-yellow-100 text-yellow-600 rounded-lg mr-3">📝</span> Buat Tugas Baru
                 </h3>
@@ -118,7 +118,7 @@
                         </button>
                     </div>
                 </form>
-            </div>
+            </div> --}}
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {{-- Daftar Materi --}}

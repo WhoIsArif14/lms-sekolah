@@ -10,7 +10,8 @@ class Assignment extends Model
         'course_id',
         'title',
         'instruction',
-        'deadline'
+        'deadline',
+        'file_path'
     ];
 
     protected $casts = [
