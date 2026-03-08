@@ -44,40 +44,73 @@ class ImportController extends Controller
             return back()->withErrors(['file' => 'File tidak dapat dibaca. Pastikan format file benar.']);
         }
 
-        $imported = 0;
-        $skipped  = 0;
-        $errors   = [];
+        $imported     = 0;
+        $skipped      = 0;
+        $ortuDibuat   = 0;
+        $errors       = [];
 
         foreach ($data as $index => $row) {
             if ($index == 0) continue;
             if (empty($row[0]) || empty($row[1])) continue;
 
-            $nama  = trim($row[0]);
-            $email = trim($row[1]);
+            $namaSiswa  = trim($row[0]);
+            $emailSiswa = trim($row[1]);
+            $password   = $row[2] ?? 'Password123!';
+            $namaOrtu   = trim($row[3] ?? '');
+            $emailOrtu  = trim($row[4] ?? '');
+            $passwordOrtu = $row[5] ?? 'Password123!';
 
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $errors[] = "Baris " . ($index + 1) . ": Email '{$email}' tidak valid.";
+            // Validasi email siswa
+            if (!filter_var($emailSiswa, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = "Baris " . ($index + 1) . ": Email siswa '{$emailSiswa}' tidak valid.";
                 $skipped++;
                 continue;
             }
 
-            if (User::where('email', $email)->exists()) {
-                $errors[] = "Baris " . ($index + 1) . ": Email '{$email}' sudah terdaftar.";
+            // Skip jika email siswa sudah ada
+            if (User::where('email', $emailSiswa)->exists()) {
+                $errors[] = "Baris " . ($index + 1) . ": Email siswa '{$emailSiswa}' sudah terdaftar.";
                 $skipped++;
                 continue;
             }
 
+            // Handle akun orang tua
+            $parentId = null;
+            if (!empty($emailOrtu) && filter_var($emailOrtu, FILTER_VALIDATE_EMAIL)) {
+                $ortu = User::where('email', $emailOrtu)->first();
+
+                if (!$ortu) {
+                    // Buat akun orang tua baru
+                    $ortu = User::create([
+                        'name'     => !empty($namaOrtu) ? $namaOrtu : 'Orang Tua ' . $namaSiswa,
+                        'email'    => $emailOrtu,
+                        'password' => Hash::make($passwordOrtu),
+                        'role'     => 'ortu',
+                    ]);
+                    $ortuDibuat++;
+                } elseif ($ortu->role !== 'ortu') {
+                    // Jika akun sudah ada tapi bukan ortu, update rolenya
+                    $ortu->update(['role' => 'ortu']);
+                }
+
+                $parentId = $ortu->id;
+            }
+
+            // Buat akun siswa
             User::create([
-                'name'     => $nama,
-                'email'    => $email,
-                'password' => Hash::make($row[2] ?? 'Password123!'),
-                'role'     => 'siswa',
+                'name'      => $namaSiswa,
+                'email'     => $emailSiswa,
+                'password'  => Hash::make($password),
+                'role'      => 'siswa',
+                'parent_id' => $parentId,
             ]);
+
             $imported++;
         }
 
         $message = "{$imported} siswa berhasil diimpor.";
-        if ($skipped > 0) $message .= " {$skipped} baris dilewati.";
+        if ($ortuDibuat > 0) $message .= " {$ortuDibuat} akun orang tua baru dibuat.";
+        if ($skipped > 0)    $message .= " {$skipped} baris dilewati.";
         if (!empty($errors)) session()->flash('import_errors', $errors);
 
         return back()->with('success', $message);
@@ -208,11 +241,21 @@ class ImportController extends Controller
                 $guru->update(['role' => 'guru']);
             }
 
-            // 2. Cari kelas berdasarkan nama
+            // 2. Cari kelas berdasarkan nama - support format "10-AK 1" atau "AK 1"
             $class = null;
-            $classroom = null;
             if (!empty($namaKelas)) {
+                // Coba cari langsung by name dulu
                 $class = SchoolClass::where('name', $namaKelas)->first();
+
+                // Jika tidak ketemu, coba parse format "grade-name" seperti "10-AK 1"
+                if (!$class && str_contains($namaKelas, '-')) {
+                    $parts = explode('-', $namaKelas, 2);
+                    $grade = trim($parts[0]);
+                    $name  = trim($parts[1]);
+                    $class = SchoolClass::where('grade', $grade)
+                        ->where('name', $name)
+                        ->first();
+                }
 
                 if (!$class) {
                     $errors[] = "Baris " . ($index + 1) . ": Kelas '{$namaKelas}' tidak ditemukan. Guru '{$namaGuru}' tetap dibuat tanpa kelas.";
@@ -240,7 +283,6 @@ class ImportController extends Controller
                 ]);
 
                 $imported++;
-
             } catch (\Exception $e) {
                 Log::error("Gagal buat course baris " . ($index + 1) . ": " . $e->getMessage());
                 $errors[] = "Baris " . ($index + 1) . ": Gagal menyimpan mata pelajaran. " . $e->getMessage();
@@ -264,33 +306,80 @@ class ImportController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Template Siswa');
 
-        $headers = ['Nama', 'Email', 'Password'];
+        // Header
+        $headers = [
+            'Nama Siswa',
+            'Email Siswa',
+            'Password Siswa',
+            'Nama Orang Tua',
+            'Email Orang Tua',
+            'Password Orang Tua',
+        ];
         $sheet->fromArray($headers, NULL, 'A1');
 
-        $sheet->getStyle('A1:C1')->applyFromArray([
+        // Style header
+        $sheet->getStyle('A1:F1')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F46E5']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
         ]);
 
+        // Contoh data baris 1
         $sheet->setCellValue('A2', 'Budi Santoso');
         $sheet->setCellValue('B2', 'budi@example.com');
         $sheet->setCellValue('C2', 'Password123!');
+        $sheet->setCellValue('D2', 'Ahmad Subagyo');
+        $sheet->setCellValue('E2', 'ahmad@example.com');
+        $sheet->setCellValue('F2', 'Password123!');
+
+        // Contoh data baris 2
         $sheet->setCellValue('A3', 'Siti Aminah');
         $sheet->setCellValue('B3', 'siti@example.com');
         $sheet->setCellValue('C3', 'Password123!');
+        $sheet->setCellValue('D3', 'Dewi Rahayu');
+        $sheet->setCellValue('E3', 'dewi@example.com');
+        $sheet->setCellValue('F3', 'Password123!');
 
-        $sheet->getStyle('A2:C3')->applyFromArray([
+        // Contoh data baris 3 - siswa tanpa ortu (kolom ortu dikosongkan)
+        $sheet->setCellValue('A4', 'Rafi Pratama');
+        $sheet->setCellValue('B4', 'rafi@example.com');
+        $sheet->setCellValue('C4', 'Password123!');
+        $sheet->setCellValue('D4', '(opsional)');
+        $sheet->setCellValue('E4', '(opsional)');
+        $sheet->setCellValue('F4', '(opsional)');
+
+        // Warna baris contoh
+        $sheet->getStyle('A2:F3')->applyFromArray([
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'EEF2FF']],
         ]);
+        $sheet->getStyle('A4:F4')->applyFromArray([
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F9FAFB']],
+            'font' => ['italic' => true, 'color' => ['rgb' => '9CA3AF']],
+        ]);
 
-        foreach (range('A', 'C') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
-        }
-
-        $sheet->getStyle('A1:C3')->applyFromArray([
+        // Border
+        $sheet->getStyle('A1:F4')->applyFromArray([
             'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
         ]);
+
+        // Info tambahan
+        $sheet->setCellValue('A6', 'CATATAN:');
+        $sheet->getStyle('A6')->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => '4F46E5']],
+        ]);
+        $sheet->setCellValue('A7', '• Kolom Nama & Email Siswa wajib diisi.');
+        $sheet->setCellValue('A8', '• Kolom Orang Tua bersifat opsional. Jika email ortu sudah terdaftar, akun ortu tidak akan dibuat ulang.');
+        $sheet->setCellValue('A9', '• Jika email ortu belum ada, sistem akan otomatis membuat akun ortu baru.');
+        $sheet->setCellValue('A10', '• Password default jika dikosongkan: Password123!');
+
+        $sheet->getStyle('A7:A10')->applyFromArray([
+            'font' => ['color' => ['rgb' => '6B7280']],
+        ]);
+
+        // Auto size
+        foreach (range('A', 'F') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
 
         $writer = new Xlsx($spreadsheet);
         return response()->streamDownload(function () use ($writer) {

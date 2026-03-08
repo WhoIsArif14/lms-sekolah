@@ -2,81 +2,76 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
-        // role is set when admin creates users and during imports
         'role',
         'parent_phone',
         'parent_id',
         'school_class_id',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
         ];
     }
 
+    // Relasi ke courses (sebagai guru)
     public function courses()
     {
         return $this->hasMany(Course::class);
     }
 
-    // hubungan siswa dengan pengumpulan tugas
+    // Relasi ke submissions (pengumpulan tugas siswa)
     public function submissions()
     {
         return $this->hasMany(Submission::class);
     }
 
-    /**
-     * Relationship: Siswa memiliki satu kelas
-     */
+    // Relasi ke kelas
     public function schoolClass()
     {
         return $this->belongsTo(SchoolClass::class, 'school_class_id');
     }
 
+    // Relasi ortu ke anak
     public function children()
     {
         return $this->hasMany(User::class, 'parent_id');
     }
 
+    // Relasi anak ke ortu
     public function parent()
     {
         return $this->belongsTo(User::class, 'parent_id');
+    }
+
+    // Relasi ke attendances ← TAMBAHAN
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    // Relasi ke exam responses ← TAMBAHAN
+    public function examResponses()
+    {
+        return $this->hasMany(ExamResponse::class);
     }
 }

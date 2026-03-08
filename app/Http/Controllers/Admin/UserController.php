@@ -32,9 +32,9 @@ class UserController extends Controller
 
     public function create()
     {
-        // Ambil data orang tua untuk pilihan jika nanti ingin langsung dihubungkan
         $parents = User::where('role', 'ortu')->get();
-        return view('admin.users.create', compact('parents'));
+        $classes = \App\Models\SchoolClass::orderBy('grade')->orderBy('name')->get();
+        return view('admin.users.create', compact('parents', 'classes'));
     }
 
     public function store(Request $request)
@@ -64,10 +64,10 @@ class UserController extends Controller
 
     public function edit($id)
     {
-        $user = User::findOrFail($id);
-        // Pilihan orang tua hanya muncul jika user yang diedit adalah 'siswa'
+        $user    = User::findOrFail($id);
         $parents = User::where('role', 'ortu')->get();
-        return view('admin.users.edit', compact('user', 'parents'));
+        $classes = \App\Models\SchoolClass::orderBy('grade')->orderBy('name')->get();
+        return view('admin.users.edit', compact('user', 'parents', 'classes'));
     }
 
     public function update(Request $request, User $user)
