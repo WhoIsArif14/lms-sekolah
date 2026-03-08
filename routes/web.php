@@ -26,24 +26,19 @@ use App\Models\User;
 use App\Models\Course;
 
 Route::get('/', function () {
-    // metrics untuk halaman utama (belum diautentikasi)
-    // rata‑rata skor ujian seluruh siswa
     $avgAcademic = \App\Models\ExamResponse::query()->avg('score') ?: 0;
 
-    // tingkat kehadiran: persentase record dengan status "present"
     $totalAttendance = \App\Models\Attendance::count();
     $presentCount = $totalAttendance
         ? \App\Models\Attendance::where('status', 'present')->count()
         : 0;
     $attendanceRate = $totalAttendance ? ($presentCount / $totalAttendance) * 100 : 0;
 
-    // jumlah siswa dengan nilai di bawah KKM (anggap KKM = 75)
     $kkm = 75;
     $lowScoreCount = \App\Models\ExamResponse::where('score', '<', $kkm)
         ->distinct('user_id')
         ->count();
 
-    // jumlah siswa yang sering absen (paling sederhana: pernah absen)
     $lowAttendanceCount = \App\Models\Attendance::where('status', '!=', 'present')
         ->distinct('user_id')
         ->count();
@@ -56,9 +51,6 @@ Route::get('/', function () {
     ));
 });
 
-/**
- * Route Dashboard Utama (Auto-Redirect berdasarkan Role)
- */
 Route::get('/dashboard', function () {
     if (!Auth::check()) return redirect()->route('login');
 
@@ -71,23 +63,19 @@ Route::get('/dashboard', function () {
     };
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-/**
- * Grup Route Terautentikasi
- */
 Route::middleware('auth')->group(function () {
 
-    // --- AREA UMUM (Diskusi & Jadwal) ---
+    // --- AREA UMUM ---
     Route::post('/courses/{course}/discussion', [DiscussionController::class, 'store'])->name('discussions.store');
     Route::delete('/discussion/{discussion}', [DiscussionController::class, 'destroy'])->name('discussions.destroy');
     Route::get('/jadwal-online', [ScheduleController::class, 'index'])->name('jadwal.index');
 
     // --- AREA KHUSUS ADMIN ---
-    // Pastikan middleware 'role:admin' sudah terdaftar di Kernel.php
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/dashboard', function () {
-            $count_guru = User::where('role', 'guru')->count(); // Sesuaikan role 'teacher' atau 'guru'
-            $count_siswa = User::where('role', 'siswa')->count();
+            $count_guru   = User::where('role', 'guru')->count();
+            $count_siswa  = User::where('role', 'siswa')->count();
             $count_course = Course::count();
             return view('admin.dashboard', compact('count_guru', 'count_siswa', 'count_course'));
         })->name('dashboard');
@@ -101,25 +89,23 @@ Route::middleware('auth')->group(function () {
         Route::get('/attendance/classes', [AdminAttendance::class, 'index'])->name('attendance.classes');
         Route::get('/attendance/classes/{id}', [AdminAttendance::class, 'showClass'])->name('attendance.class');
 
-        // Menu Manajemen Kelas
+        // Manajemen Kelas
         Route::get('/classes', [ClassController::class, 'index'])->name('classes.index');
         Route::post('/classes', [ClassController::class, 'store'])->name('classes.store');
         Route::get('/classes/{id}', [ClassController::class, 'show'])->name('classes.show');
         Route::delete('/classes/{class}', [ClassController::class, 'destroy'])->name('classes.destroy');
 
-        // Import Siswa/Ortu per halaman Detail Kelas
+        // Import per Kelas
         Route::post('/classes/{id}/import', [ClassController::class, 'importSiswa'])->name('classes.import.siswa');
         Route::post('/classes/{id}/import-parents', [ClassController::class, 'importParents'])->name('classes.import.parents');
         Route::get('/classes/{id}/template/students', [ClassController::class, 'downloadStudentTemplate'])->name('classes.template.students');
 
-        // Di dalam group admin
+        // Import Global
         Route::get('/imports', [ImportController::class, 'index'])->name('imports.index');
         Route::post('/imports/students', [ImportController::class, 'importStudents'])->name('imports.students');
         Route::post('/imports/parents', [ImportController::class, 'importParents'])->name('imports.parents');
         Route::get('/imports/template/students', [ImportController::class, 'downloadStudentTemplate'])->name('imports.template.students');
         Route::get('/imports/template/parents', [ImportController::class, 'downloadParentTemplate'])->name('imports.template.parents');
-
-        // Route guru/jadwal — ini harus pakai ImportController, BUKAN ClassController
         Route::get('/imports/template/teachers', [ImportController::class, 'downloadTeacherTemplate'])->name('teachers.template');
         Route::post('/imports/teachers', [ImportController::class, 'importTeachers'])->name('teachers.import');
     });
@@ -131,20 +117,24 @@ Route::middleware('auth')->group(function () {
         // Course Management
         Route::resource('courses', GuruCourse::class);
 
-        // Material Management (Disederhanakan)
+        // Material Management
         Route::post('/courses/{course}/materials', [MaterialController::class, 'store'])->name('materials.store');
         Route::delete('/materials/{material}', [MaterialController::class, 'destroy'])->name('materials.destroy');
 
-        // Assignment Management (CRUD Global & Specific)
+        // Assignment Management
         Route::resource('assignments', AssignmentController::class);
-        // Rute khusus jika Guru ingin buat tugas LANGSUNG dari dalam halaman detail Kursus
         Route::post('/courses/{course}/assignments', [AssignmentController::class, 'store'])->name('courses.assignments.store');
 
+        // Exam Management
         Route::get('/course/{courseId}/exams', [ExamController::class, 'index'])->name('exams.index');
         Route::post('/course/{courseId}/exams', [ExamController::class, 'store'])->name('exams.store');
         Route::get('/exams/{id}', [ExamController::class, 'show'])->name('exams.show');
         Route::post('/exams/{id}/questions', [ExamController::class, 'storeQuestion'])->name('exams.questions.store');
         Route::post('/exams/{id}/toggle', [ExamController::class, 'toggleStatus'])->name('exams.toggle');
+
+        // ← TAMBAHAN: Import & Template Soal
+        Route::get('/exams/{id}/template-questions', [ExamController::class, 'downloadQuestionTemplate'])->name('exams.questions.template');
+        Route::post('/exams/{id}/import-questions', [ExamController::class, 'importQuestions'])->name('exams.questions.import');
     });
 
     // --- AREA KHUSUS SISWA ---
@@ -166,6 +156,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/profile', 'destroy')->name('profile.destroy');
     });
 
+    // --- AREA KHUSUS ORTU ---
     Route::middleware(['auth', 'role:ortu'])->prefix('ortu')->name('ortu.')->group(function () {
         Route::get('/dashboard', [ParentController::class, 'index'])->name('dashboard');
         Route::get('/child/{id}', [ParentController::class, 'showChildActivity'])->name('child.detail');
