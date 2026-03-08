@@ -81,22 +81,25 @@ class ImportController extends Controller
         $sheet->setCellValue('B1', 'Email');
         $sheet->setCellValue('C1', 'Password');
         $sheet->setCellValue('D1', 'Parent Email');
+        $sheet->setCellValue('E1', 'Parent Phone');
 
         // Format header
-        $sheet->getStyle('A1:D1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:D1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFB3E5FC');
+        $sheet->getStyle('A1:E1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:E1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFB3E5FC');
 
         // Set column width
         $sheet->getColumnDimension('A')->setWidth(25);
         $sheet->getColumnDimension('B')->setWidth(30);
         $sheet->getColumnDimension('C')->setWidth(20);
         $sheet->getColumnDimension('D')->setWidth(30);
+        $sheet->getColumnDimension('E')->setWidth(25);
 
         // Add example data
         $sheet->setCellValue('A2', 'Budi Santoso');
         $sheet->setCellValue('B2', 'budi@example.com');
         $sheet->setCellValue('C2', 'Password123!');
         $sheet->setCellValue('D2', 'parent@example.com');
+        $sheet->setCellValue('E2', '628123456789');
 
         // Save and download
         $writer = new Xlsx($spreadsheet);
@@ -119,20 +122,23 @@ class ImportController extends Controller
         $sheet->setCellValue('A1', 'Name');
         $sheet->setCellValue('B1', 'Email');
         $sheet->setCellValue('C1', 'Password');
+        $sheet->setCellValue('D1', 'Parent Phone');
 
         // Format header
-        $sheet->getStyle('A1:C1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:C1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFC8E6C9');
+        $sheet->getStyle('A1:D1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:D1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFC8E6C9');
 
         // Set column width
         $sheet->getColumnDimension('A')->setWidth(25);
         $sheet->getColumnDimension('B')->setWidth(30);
         $sheet->getColumnDimension('C')->setWidth(20);
+        $sheet->getColumnDimension('D')->setWidth(25);
 
         // Add example data
         $sheet->setCellValue('A2', 'Siti Nurjanah');
         $sheet->setCellValue('B2', 'siti@example.com');
         $sheet->setCellValue('C2', 'Password123!');
+        $sheet->setCellValue('D2', '628123456789');
 
         // Save and download
         $writer = new Xlsx($spreadsheet);

@@ -47,6 +47,7 @@
                                 <li>• <strong>Email</strong>: Email siswa</li>
                                 <li>• <strong>Password</strong>: Password (opsional, default: Password123!)</li>
                                 <li>• <strong>Parent Email</strong>: Email orang tua (opsional)</li>
+                                <li>• <strong>Parent Phone</strong>: Nomor HP orang tua (opsional)</li>
                             </ul>
                         </div>
 
@@ -98,6 +99,7 @@
                                 <li>• <strong>Name</strong>: Nama orang tua</li>
                                 <li>• <strong>Email</strong>: Email orang tua</li>
                                 <li>• <strong>Password</strong>: Password (opsional, default: Password123!)</li>
+                                <li>• <strong>Parent Phone</strong>: Nomor HP orang tua (opsional)</li>
                             </ul>
                         </div>
 
@@ -147,6 +149,7 @@
                     <li>• Jika password tidak diisi, default password adalah <code
                             class="bg-yellow-100 px-2 py-1 rounded">Password123!</code></li>
                     <li>• Untuk siswa, opsional bisa mencantumkan Email orang tua di kolom <strong>Parent Email</strong>
+                        atau Nomor HP orang tua di kolom <strong>Parent Phone</strong></li>
                     </li>
                     <li>• Data yang sudah ada akan di-skip, tidak akan ditimpa</li>
                 </ul>

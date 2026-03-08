@@ -66,6 +66,7 @@ Route::get('/dashboard', function () {
         'admin' => redirect()->route('admin.dashboard'),
         'guru'  => redirect()->route('guru.dashboard'),
         'siswa' => redirect()->route('siswa.dashboard'),
+        'ortu'  => redirect()->route('ortu.dashboard'),
         default => redirect('/'),
     };
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -158,6 +159,9 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['auth', 'role:ortu'])->prefix('ortu')->name('ortu.')->group(function () {
         Route::get('/dashboard', [ParentController::class, 'index'])->name('dashboard');
         Route::get('/child/{id}', [ParentController::class, 'showChildActivity'])->name('child.detail');
+        Route::get('/notifications', [ParentController::class, 'notifications'])->name('notifications');
+        Route::post('/notifications/{id}/read', [ParentController::class, 'markNotificationAsRead'])->name('notifications.read');
+        Route::post('/notifications/mark-all-read', [ParentController::class, 'markAllNotificationsAsRead'])->name('notifications.mark-all-read');
     });
 });
 

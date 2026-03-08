@@ -15,8 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            // Tambahkan ini: admin, guru, siswa
-            $table->enum('role', ['admin', 'guru', 'siswa'])->default('siswa');
+            $table->enum('role', ['admin', 'guru', 'siswa', 'orang_tua'])->default('siswa'); // Tambah role orang_tua jika perlu
+            $table->string('parent_phone')->nullable(); // Pindahkan dari file migrasi "add" ke sini
+            $table->foreignId('school_class_id')->nullable()->constrained('school_classes')->onDelete('cascade'); // Jika siswa butuh kelas
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

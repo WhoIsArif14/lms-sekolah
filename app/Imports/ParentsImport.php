@@ -33,6 +33,7 @@ class ParentsImport implements ToModel, WithHeadingRow, SkipsEmptyRows
             'email'    => $row['email'] ?? null,
             'password' => Hash::make($row['password'] ?? 'Password123!'),
             'role'     => 'ortu',
+            'parent_phone' => $row['parent_phone'] ?? null,
         ]);
     }
 }

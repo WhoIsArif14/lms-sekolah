@@ -14,7 +14,11 @@ class Attendance extends Model
         'user_id',
         'attendance_date',
         'status',
+        'type',
         'note',
-        'attachment'
+        'attachment',
+        'minutes_late',
+        'lat_siswa',
+        'lng_siswa',
     ];
 }

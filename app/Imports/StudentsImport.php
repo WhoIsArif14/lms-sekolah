@@ -28,14 +28,18 @@ class StudentsImport implements ToModel, WithHeadingRow, SkipsEmptyRows
             return null; // Skip jika email sudah ada
         }
 
+        $parent = null;
+        if (isset($row['parent_email'])) {
+            $parent = User::where('email', $row['parent_email'])->where('role', 'ortu')->first();
+        }
+
         return new User([
             'name'      => $row['name'] ?? null,
             'email'     => $row['email'] ?? null,
             'password'  => Hash::make($row['password'] ?? 'Password123!'),
             'role'      => 'siswa',
-            'parent_id' => isset($row['parent_email'])
-                ? User::where('email', $row['parent_email'])->where('role', 'ortu')->first()?->id
-                : null,
+            'parent_id' => $parent?->id,
+            'parent_phone' => $row['parent_phone'] ?? $parent?->parent_phone,
         ]);
     }
 }

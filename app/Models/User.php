@@ -23,7 +23,7 @@ class User extends Authenticatable
         'password',
         // role is set when admin creates users and during imports
         'role',
-        // optional relationships
+        'parent_phone',
         'parent_id',
         'school_class_id',
     ];

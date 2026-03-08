@@ -77,39 +77,36 @@ class DashboardController extends Controller
             'status' => 'required|in:hadir,izin,sakit',
             'note' => 'nullable|string|max:255',
             'attachment' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
-            'lat_siswa' => 'required_if:status,hadir', // Lat wajib jika status 'hadir'
-            'lng_siswa' => 'required_if:status,hadir', // Lng wajib jika status 'hadir'
+            'lat_siswa' => 'nullable|numeric',
+            'lng_siswa' => 'nullable|numeric',
         ]);
 
-        // 2. Ambil Pengaturan dari Admin
-        $setting = \App\Models\AttendanceSetting::first();
-        if (!$setting) {
-            return back()->with('error', 'Pengaturan absensi belum dikonfigurasi oleh Admin.');
-        }
-
-        // 3. Cek apakah Absen sedang dibuka oleh Admin
-        if (!$setting->is_open) {
-            return back()->with('error', 'Maaf, absensi hari ini sedang ditutup oleh Admin.');
-        }
-
+        // 2. Ambil waktu saat ini
         $now = Carbon::now();
         $today = $now->format('Y-m-d');
         $currentTime = $now->format('H:i:s');
 
-        // 4. Cek apakah Siswa sudah absen hari ini (Cegah Double Absen)
+        // 3. Ambil Pengaturan dari Admin
+        $setting = \App\Models\AttendanceSetting::first();
+
+        // 4. Tentukan tipe absen berdasarkan waktu
+        $type = $now->hour < 12 ? 'MASUK' : 'PULANG';
+
+        // 5. Cek apakah Siswa sudah absen hari ini untuk tipe yang sama (Cegah Double Absen per tipe)
         $alreadyAbsen = \App\Models\Attendance::where('user_id', Auth::id())
             ->where('attendance_date', $today)
+            ->where('type', $type)
             ->exists();
 
         if ($alreadyAbsen) {
-            return back()->with('info', 'Anda sudah melakukan absensi untuk hari ini.');
+            return back()->with('info', "Anda sudah melakukan absen $type untuk hari ini.");
         }
 
         $minutesLate = 0;
         $attachmentPath = null;
 
-        // 5. LOGIKA KHUSUS STATUS 'HADIR' (Cek Lokasi & Terlambat)
-        if ($request->status == 'hadir') {
+        // 6. LOGIKA KHUSUS STATUS 'HADIR' (Cek Lokasi & Terlambat jika setting ada)
+        if ($request->status == 'hadir' && $setting && $setting->latitude && $setting->longitude && $request->lat_siswa && $request->lng_siswa) {
             // A. Validasi Radius Lokasi
             $distance = $this->calculateDistance(
                 $setting->latitude,
@@ -129,26 +126,44 @@ class DashboardController extends Controller
             }
         }
 
-        // 6. LOGIKA KHUSUS STATUS 'IZIN/SAKIT' (Upload File)
-        else {
+        // 7. LOGIKA KHUSUS STATUS 'IZIN/SAKIT' (Upload File)
+        else if ($request->status != 'hadir') {
             if ($request->hasFile('attachment')) {
                 $attachmentPath = $request->file('attachment')->store('attendance_letters', 'public');
             }
         }
 
-        // 7. Simpan ke Database
+        // 8. Simpan ke Database
         \App\Models\Attendance::create([
             'user_id' => Auth::id(),
             'attendance_date' => $today,
             'status' => $request->status,
+            'type' => $type,
             'note' => $request->note,
             'attachment' => $attachmentPath,
-            'lat_siswa' => $request->lat_siswa,
-            'lng_siswa' => $request->lng_siswa,
+            'lat_siswa' => $request->lat_siswa ?: null,
+            'lng_siswa' => $request->lng_siswa ?: null,
             'minutes_late' => $minutesLate,
         ]);
 
-        // 8. Berikan Feedback ke Siswa
+        // 9. Kirim notifikasi ke orang tua jika ada parent_id
+        $user = Auth::user();
+        \Log::info("User absen: {$user->name}, parent_id: {$user->parent_id}");
+
+        if ($user->parent_id) {
+            if ($request->status == 'hadir') {
+                \App\Models\Notification::createAttendanceNotification($user, $type);
+            } elseif ($request->status == 'izin') {
+                \App\Models\Notification::createAttendanceNotification($user, 'IZIN', $request->note);
+            } elseif ($request->status == 'sakit') {
+                \App\Models\Notification::createAttendanceNotification($user, 'SAKIT', $request->note);
+            }
+            \Log::info("Notifikasi absensi berhasil dibuat untuk parent_id: {$user->parent_id}");
+        } else {
+            \Log::info("User {$user->name} tidak memiliki parent_id");
+        }
+
+        // 10. Berikan Feedback ke Siswa
         $statusMsg = ($request->status == 'hadir') ? "Hadir" : ucfirst($request->status);
         $lateMsg = ($minutesLate > 0) ? " Namun Anda terlambat $minutesLate menit." : "";
 

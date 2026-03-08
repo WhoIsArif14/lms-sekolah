@@ -24,11 +24,19 @@
 
                     <div class="mb-4">
                         <label class="block text-gray-700 font-bold mb-2">Role</label>
-                        <select name="role" id="role-select" class="w-full border-gray-300 rounded-xl shadow-sm" onchange="toggleParentSelect()">
+                        <select name="role" id="role-select" class="w-full border-gray-300 rounded-xl shadow-sm" onchange="toggleFields()">
                             <option value="guru" {{ $user->role == 'guru' ? 'selected' : '' }}>Guru</option>
                             <option value="siswa" {{ $user->role == 'siswa' ? 'selected' : '' }}>Siswa</option>
                             <option value="ortu" {{ $user->role == 'ortu' ? 'selected' : '' }}>Orang Tua</option>
                         </select>
+                    </div>
+
+                    <div id="wa-section" class="mb-4 {{ in_array($user->role, ['siswa', 'ortu']) ? '' : 'hidden' }}">
+                        <label class="block text-green-700 font-bold mb-2 uppercase text-xs tracking-wider">Nomor WhatsApp Orang Tua</label>
+                        <input type="text" name="parent_phone" value="{{ $user->parent_phone }}" 
+                               class="w-full border-green-200 bg-green-50 rounded-xl shadow-sm focus:ring-green-500" 
+                               placeholder="Contoh: 628123456789">
+                        <p class="text-[10px] text-green-600 mt-1 italic">*Gunakan awalan 62 (Kode Negara) agar Bot WA bisa mengirim notifikasi.</p>
                     </div>
 
                     <div id="parent-selection" class="mb-4 {{ $user->role == 'siswa' ? '' : 'hidden' }}">
@@ -41,7 +49,7 @@
                                 </option>
                             @endforeach
                         </select>
-                        <p class="text-[10px] text-indigo-400 mt-1 italic">*Data ini digunakan agar Orang Tua bisa melihat absen & nilai anak.</p>
+                        <p class="text-[10px] text-indigo-400 mt-1 italic">*Data ini digunakan agar Orang Tua bisa melihat absen & nilai anak melalui akun mereka.</p>
                     </div>
 
                     <div class="p-4 bg-amber-50 rounded-2xl mb-6 border border-amber-100">
@@ -67,14 +75,23 @@
     </div>
 
     <script>
-        function toggleParentSelect() {
+        function toggleFields() {
             const role = document.getElementById('role-select').value;
             const parentDiv = document.getElementById('parent-selection');
+            const waSection = document.getElementById('wa-section');
             
+            // Tampilkan pilihan hubungkan ortu hanya untuk siswa
             if (role === 'siswa') {
                 parentDiv.classList.remove('hidden');
             } else {
                 parentDiv.classList.add('hidden');
+            }
+
+            // Tampilkan input nomor WA hanya untuk siswa dan ortu
+            if (role === 'siswa' || role === 'ortu') {
+                waSection.classList.remove('hidden');
+            } else {
+                waSection.classList.add('hidden');
             }
         }
     </script>
