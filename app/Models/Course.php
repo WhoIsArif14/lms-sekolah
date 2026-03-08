@@ -55,8 +55,11 @@ class Course extends Model
 
     public function teacher(): BelongsTo
     {
-        // Pastikan nama foreign key di tabel courses adalah 'teacher_id'
-        // Jika namanya berbeda, ubah parameter kedua di bawah
         return $this->belongsTo(User::class, 'teacher_id');
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class);
     }
 }

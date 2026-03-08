@@ -82,9 +82,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/jadwal-online', [ScheduleController::class, 'index'])->name('jadwal.index');
 
     // --- AREA KHUSUS ADMIN ---
+    // Pastikan middleware 'role:admin' sudah terdaftar di Kernel.php
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
+
         Route::get('/dashboard', function () {
-            $count_guru = User::where('role', 'guru')->count();
+            $count_guru = User::where('role', 'teacher')->count(); // Sesuaikan role 'teacher' atau 'guru'
             $count_siswa = User::where('role', 'siswa')->count();
             $count_course = Course::count();
             return view('admin.dashboard', compact('count_guru', 'count_siswa', 'count_course'));
@@ -92,6 +94,8 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('users', AdminUser::class);
         Route::resource('courses', AdminCourse::class)->only(['index', 'destroy']);
+
+        // Attendance
         Route::get('/attendance', [AdminAttendance::class, 'index'])->name('attendance.index');
         Route::post('/attendance/update', [AdminAttendance::class, 'updateSetting'])->name('attendance.update');
         Route::get('/attendance/classes', [AdminAttendance::class, 'index'])->name('attendance.classes');
@@ -100,22 +104,24 @@ Route::middleware('auth')->group(function () {
         // Menu Manajemen Kelas
         Route::get('/classes', [ClassController::class, 'index'])->name('classes.index');
         Route::post('/classes', [ClassController::class, 'store'])->name('classes.store');
+        Route::get('/classes/{id}', [ClassController::class, 'show'])->name('classes.show');
         Route::delete('/classes/{class}', [ClassController::class, 'destroy'])->name('classes.destroy');
 
-        // import siswa/ortu per kelas
+        // Import Siswa/Ortu per halaman Detail Kelas
         Route::post('/classes/{id}/import', [ClassController::class, 'importSiswa'])->name('classes.import.siswa');
         Route::post('/classes/{id}/import-parents', [ClassController::class, 'importParents'])->name('classes.import.parents');
-        // download template impor siswa per kelas
         Route::get('/classes/{id}/template/students', [ClassController::class, 'downloadStudentTemplate'])->name('classes.template.students');
 
-        Route::get('/classes/{id}', [ClassController::class, 'show'])->name('classes.show');
-
-        // Menu Import Data
+        // Di dalam group admin
         Route::get('/imports', [ImportController::class, 'index'])->name('imports.index');
         Route::post('/imports/students', [ImportController::class, 'importStudents'])->name('imports.students');
         Route::post('/imports/parents', [ImportController::class, 'importParents'])->name('imports.parents');
         Route::get('/imports/template/students', [ImportController::class, 'downloadStudentTemplate'])->name('imports.template.students');
         Route::get('/imports/template/parents', [ImportController::class, 'downloadParentTemplate'])->name('imports.template.parents');
+
+        // Route guru/jadwal — ini harus pakai ImportController, BUKAN ClassController
+        Route::get('/imports/template/teachers', [ImportController::class, 'downloadTeacherTemplate'])->name('teachers.template');
+        Route::post('/imports/teachers', [ImportController::class, 'importTeachers'])->name('teachers.import');
     });
 
     // --- AREA KHUSUS GURU ---

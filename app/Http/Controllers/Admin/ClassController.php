@@ -5,13 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SchoolClass;
 use App\Models\User;
+use App\Models\Course;
+use App\Models\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xls;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx; // Tambahkan \Writer\
-
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx; // Pastikan ini ada
 
 class ClassController extends Controller
 {
@@ -29,7 +29,6 @@ class ClassController extends Controller
         return view('admin.classes.show', compact('class', 'students'));
     }
 
-    // Simpan kelas baru ke database
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -43,7 +42,6 @@ class ClassController extends Controller
             ->with('success', 'Kelas berhasil dibuat.');
     }
 
-    // Hapus kelas tertentu
     public function destroy($id)
     {
         $class = SchoolClass::findOrFail($id);
@@ -53,7 +51,7 @@ class ClassController extends Controller
             ->with('success', 'Kelas berhasil dihapus.');
     }
 
-    // Fungsi Proses Import Siswa per kelas
+    // --- FITUR IMPORT SISWA ---
     public function importSiswa(Request $request, $classId)
     {
         $request->validate([
@@ -65,15 +63,15 @@ class ClassController extends Controller
         $data = $spreadsheet->getActiveSheet()->toArray();
 
         foreach ($data as $index => $row) {
-            if ($index == 0) continue; // Lewati baris header (Nama, Email, dll)
+            if ($index == 0) continue; 
 
             if (!empty($row[0]) && !empty($row[1])) {
                 User::create([
-                    'name'            => $row[0], // Kolom A: Nama
-                    'email'           => $row[1], // Kolom B: Email
-                    'password'        => Hash::make($row[2] ?? 'password123'), // Kolom C: Pass
+                    'name'            => $row[0], 
+                    'email'           => $row[1], 
+                    'password'        => Hash::make($row[2] ?? 'password123'), 
                     'role'            => 'siswa',
-                    'school_class_id' => $classId, // Otomatis masuk ke kelas ini
+                    'school_class_id' => $classId, 
                 ]);
             }
         }
@@ -81,70 +79,110 @@ class ClassController extends Controller
         return back()->with('success', 'Data siswa berhasil diimpor ke kelas!');
     }
 
-    /**
-     * Download template import siswa khusus per kelas
-     */
     public function downloadStudentTemplate($classId)
     {
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        // header sederhana
         $sheet->setCellValue('A1', 'Nama');
         $sheet->setCellValue('B1', 'Email');
         $sheet->setCellValue('C1', 'Password');
 
-        // styling
         $sheet->getStyle('A1:C1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:C1')->getFill()
-            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-            ->getStartColor()->setARGB('FFFDEBD0');
-
-        // column widths
         $sheet->getColumnDimension('A')->setWidth(25);
         $sheet->getColumnDimension('B')->setWidth(30);
-        $sheet->getColumnDimension('C')->setWidth(20);
 
-        // example row
+        // Contoh baris
         $sheet->setCellValue('A2', 'Budi Santoso');
         $sheet->setCellValue('B2', 'budi@example.com');
         $sheet->setCellValue('C2', 'Password123!');
 
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer = new Xlsx($spreadsheet); // Perbaikan Namespace
         $filename = "Template_Import_Siswa_Kelas_{$classId}.xlsx";
-        $response = response()->streamDownload(function () use ($writer) {
+        
+        return response()->streamDownload(function () use ($writer) {
             $writer->save('php://output');
         }, $filename);
-
-        return $response;
     }
 
-    // Fungsi Proses Import Orang Tua per kelas
-    public function importParents(Request $request, $classId)
+    // --- FITUR IMPORT GURU & JADWAL ---
+    
+    // Tambahkan fungsi ini agar tombol "Download Template Guru" di View berfungsi
+    public function downloadTeacherTemplate()
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Header Sesuai Logika Import
+        $headers = ['Nama Guru', 'Email', 'Password', 'Mata Pelajaran', 'Nama Kelas', 'Hari', 'Jam Mulai', 'Jam Selesai'];
+        $sheet->fromArray($headers, NULL, 'A1');
+
+        $sheet->getStyle('A1:H1')->getFont()->setBold(true);
+        foreach(range('A','H') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+
+        // Contoh data
+        $sheet->setCellValue('A2', 'Andi Wijaya');
+        $sheet->setCellValue('B2', 'andi@guru.com');
+        $sheet->setCellValue('C2', 'guru123');
+        $sheet->setCellValue('D2', 'Matematika');
+        $sheet->setCellValue('E2', 'X-A'); // Harus sama dengan nama kelas di DB
+        $sheet->setCellValue('F2', 'Senin');
+        $sheet->setCellValue('G2', '07:30');
+        $sheet->setCellValue('H2', '09:00');
+
+        $writer = new Xlsx($spreadsheet);
+        return response()->streamDownload(function () use ($writer) {
+            $writer->save('php://output');
+        }, "Template_Import_Guru_Jadwal.xlsx");
+    }
+
+    public function importTeachers(Request $request)
     {
         $request->validate([
             'file' => 'required|mimes:xlsx,xls,csv|max:2048'
         ]);
 
-        $file = $request->file('file');
-        $spreadsheet = IOFactory::load($file->getRealPath());
+        $spreadsheet = IOFactory::load($request->file('file')->getRealPath());
         $data = $spreadsheet->getActiveSheet()->toArray();
 
         foreach ($data as $index => $row) {
-            if ($index == 0) continue; // Lewati header
+            if ($index == 0 || empty($row[1])) continue; 
 
-            if (!empty($row[0]) && !empty($row[1])) {
-                User::create([
-                    'name'            => $row[0],
-                    'email'           => $row[1],
-                    'password'        => Hash::make($row[2] ?? 'password123'),
-                    'role'            => 'ortu',
-                    'parent_phone'    => $row[3] ?? null,
-                    'school_class_id' => $classId, // tandai file dengan kelas yang sama
+            // 1. Buat atau Temukan User Guru
+            $teacher = User::firstOrCreate(
+                ['email' => $row[1]], 
+                [
+                    'name'     => $row[0], 
+                    'password' => Hash::make($row[2] ?? 'guru123'),
+                    'role'     => 'teacher',
+                ]
+            );
+
+            // 2. Cari Kelas berdasarkan Nama (Kolom E)
+            $class = SchoolClass::where('name', $row[4])->first();
+
+            if ($class) {
+                // 3. Buat Kursus/Mapel (Kolom D)
+                $course = Course::create([
+                    'title'           => $row[3],
+                    'teacher_id'      => $teacher->id,
+                    'school_class_id' => $class->id,
                 ]);
+
+                // 4. Simpan Jadwal (Kolom F, G, H)
+                if (!empty($row[5])) {
+                    Schedule::create([
+                        'course_id'  => $course->id,
+                        'day'        => $row[5],
+                        'start_time' => $row[6],
+                        'end_time'   => $row[7],
+                    ]);
+                }
             }
         }
 
-        return back()->with('success', 'Data orang tua berhasil diimpor ke kelas!');
+        return back()->with('success', 'Data Guru, Mapel, dan Jadwal berhasil diimpor!');
     }
 }
