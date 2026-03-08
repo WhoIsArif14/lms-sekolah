@@ -25,7 +25,31 @@ class ClassController extends Controller
         return view('admin.classes.show', compact('class', 'students'));
     }
 
-    // Fungsi Proses Import
+    // Simpan kelas baru ke database
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'grade' => ['required', 'string', 'max:10'],
+            'name'  => ['required', 'string', 'max:255'],
+        ]);
+
+        SchoolClass::create($data);
+
+        return redirect()->route('admin.classes.index')
+            ->with('success', 'Kelas berhasil dibuat.');
+    }
+
+    // Hapus kelas tertentu
+    public function destroy($id)
+    {
+        $class = SchoolClass::findOrFail($id);
+        $class->delete();
+
+        return redirect()->route('admin.classes.index')
+            ->with('success', 'Kelas berhasil dihapus.');
+    }
+
+    // Fungsi Proses Import Siswa per kelas
     public function importSiswa(Request $request, $classId)
     {
         $request->validate([
@@ -51,5 +75,34 @@ class ClassController extends Controller
         }
 
         return back()->with('success', 'Data siswa berhasil diimpor ke kelas!');
+    }
+
+    // Fungsi Proses Import Orang Tua per kelas
+    public function importParents(Request $request, $classId)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048'
+        ]);
+
+        $file = $request->file('file');
+        $spreadsheet = IOFactory::load($file->getRealPath());
+        $data = $spreadsheet->getActiveSheet()->toArray();
+
+        foreach ($data as $index => $row) {
+            if ($index == 0) continue; // Lewati header
+
+            if (!empty($row[0]) && !empty($row[1])) {
+                User::create([
+                    'name'            => $row[0],
+                    'email'           => $row[1],
+                    'password'        => Hash::make($row[2] ?? 'password123'),
+                    'role'            => 'ortu',
+                    'parent_phone'    => $row[3] ?? null,
+                    'school_class_id' => $classId, // tandai file dengan kelas yang sama
+                ]);
+            }
+        }
+
+        return back()->with('success', 'Data orang tua berhasil diimpor ke kelas!');
     }
 }

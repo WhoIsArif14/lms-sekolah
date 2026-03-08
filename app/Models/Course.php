@@ -13,10 +13,11 @@ class Course extends Model
         'title',
         'description',
         'user_id',
-        'day',          // Tambahkan ini
-        'time_start',   // Tambahkan ini
-        'time_end',     // Tambahkan ini
-        'classroom'     // Tambahkan ini
+        'school_class_id',
+        'day',
+        'time_start',
+        'time_end',
+        'classroom'
     ];
 
     // TAMBAHKAN INI: Relasi ke User (Guru)

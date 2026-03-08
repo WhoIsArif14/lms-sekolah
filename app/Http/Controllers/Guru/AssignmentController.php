@@ -26,25 +26,25 @@ class AssignmentController extends Controller
         return view('guru.assignments.create', compact('courses'));
     }
 
-    public function store(Request $request)
+    // Pastikan parameter Course $course ada di sini
+    public function store(Request $request, Course $course)
     {
-        $request->validate([
-            'course_id' => 'required|exists:courses,id',
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'instructions' => 'required',
-            'deadline' => 'required|date',
-            'file_soal' => 'nullable|mimes:pdf,doc,docx,zip|max:5120', // Maks 5MB
+            'instruction' => 'required|string',
+            'deadline' => 'nullable|date',
         ]);
 
-        $data = $request->all();
+        // Ini akan otomatis mengisi course_id
+        $course->assignments()->create($validated);
 
-        if ($request->hasFile('file_soal')) {
-            $data['file_path'] = $request->file('file_soal')->store('assignments/soal', 'public');
-        }
+        return redirect()->back()->with('success', 'Tugas berhasil ditambahkan!');
+    }
 
-        Assignment::create($data);
-
-        return redirect()->route('guru.assignments.index')->with('success', 'Tugas berhasil dibuat!');
+    public function destroy(Assignment $assignment)
+    {
+        $assignment->delete();
+        return redirect()->back()->with('success', 'Tugas berhasil dihapus!');
     }
 
     public function update(Request $request, Assignment $assignment)
@@ -69,5 +69,13 @@ class AssignmentController extends Controller
         $assignment->update($data);
 
         return redirect()->route('guru.assignments.index')->with('success', 'Tugas berhasil diperbarui!');
+    }
+
+    public function destroy(Assignment $assignment)
+    {
+        // Menghapus tugas otomatis akan menghapus submission jika relasi di set cascade
+        $assignment->delete();
+
+        return back()->with('success', 'Tugas berhasil dihapus!');
     }
 }

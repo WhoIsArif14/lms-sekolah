@@ -7,63 +7,82 @@
 
     <div class="py-12">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white p-8 shadow-sm rounded-lg border border-gray-200">
+
+            @if ($errors->any())
+                <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-xl">
+                    <ul class="list-disc ml-5 text-sm font-bold">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <div class="bg-white p-8 shadow-sm rounded-2xl border border-gray-200">
                 <form action="{{ route('guru.courses.store') }}" method="POST">
                     @csrf
+
                     <div class="mb-6">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Nama Mata Pelajaran</label>
-                        <input type="text" name="title"
-                            class="w-full border-gray-300 rounded-lg focus:ring-indigo-500"
-                            placeholder="Contoh: Matematika Kelas X" required>
+                        <input type="text" name="title" value="{{ old('title') }}"
+                            class="w-full border-gray-300 rounded-xl focus:ring-indigo-500 shadow-sm"
+                            placeholder="Contoh: Matematika" required>
                     </div>
 
                     <div class="mb-6">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Deskripsi Singkat</label>
-                        <textarea name="description" rows="5" class="w-full border-gray-300 rounded-lg focus:ring-indigo-500"
-                            placeholder="Jelaskan apa yang akan dipelajari di kursus ini..." required></textarea>
+                        <textarea name="description" rows="4" class="w-full border-gray-300 rounded-xl focus:ring-indigo-500 shadow-sm"
+                            placeholder="Deskripsi kursus..." required>{{ old('description') }}</textarea>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Hari</label>
-                            <select name="day"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="Senin">Senin</option>
-                                <option value="Selasa">Selasa</option>
-                                <option value="Rabu">Rabu</option>
-                                <option value="Kamis">Kamis</option>
-                                <option value="Jumat">Jumat</option>
-                                <option value="Sabtu">Sabtu</option>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Hari</label>
+                            <select name="day" class="w-full rounded-xl border-gray-300 shadow-sm">
+                                @foreach (['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'] as $h)
+                                    <option value="{{ $h }}" {{ old('day') == $h ? 'selected' : '' }}>
+                                        {{ $h }}</option>
+                                @endforeach
                             </select>
                         </div>
-                        <div class="mb-4">
+
+                        <div>
                             <label class="block text-sm font-bold text-gray-700 mb-2">Pilih Kelas</label>
-                            <select name="school_class_id"
-                                class="w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500">
+                            <select name="school_class_id" class="w-full rounded-xl border-gray-300 shadow-sm" required>
                                 <option value="">-- Pilih Kelas --</option>
                                 @foreach ($classes as $class)
-                                    <option value="{{ $class->id }}">
-                                        Kelas {{ $class->level }} - {{ $class->name }}
+                                    <option value="{{ $class->id }}"
+                                        {{ old('school_class_id') == $class->id ? 'selected' : '' }}>
+                                        Kelas {{ $class->grade }} - {{ $class->name }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
+
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Jam Mulai</label>
-                            <input type="time" name="time_start" class="w-full rounded-md border-gray-300 shadow-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Jam Selesai</label>
-                            <input type="time" name="time_end" class="w-full rounded-md border-gray-300 shadow-sm">
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Jam Mulai</label>
+                            <input type="time" name="time_start" value="{{ old('time_start') }}"
+                                class="w-full rounded-xl border-gray-300 shadow-sm" required>
                         </div>
 
-                        <div class="flex items-center justify-end space-x-4">
-                            <a href="{{ route('guru.courses.index') }}" class="text-gray-500 hover:underline">Batal</a>
-                            <button type="submit"
-                                class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-indigo-700 shadow-lg">
-                                Simpan & Publikasikan
-                            </button>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Jam Selesai</label>
+                            <input type="time" name="time_end" value="{{ old('time_end') }}"
+                                class="w-full rounded-xl border-gray-300 shadow-sm" required>
                         </div>
+                    </div>
+
+                    <input type="hidden" name="classroom" value="-">
+
+                    <div class="flex items-center justify-end space-x-4 mt-10 pt-6 border-t border-gray-100">
+                        <a href="{{ route('guru.courses.index') }}"
+                            class="text-gray-500 hover:text-gray-800 text-sm font-medium">
+                            Batal
+                        </a>
+                        <button type="submit"
+                            class="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition transform active:scale-95">
+                            Simpan & Publikasikan
+                        </button>
                     </div>
                 </form>
             </div>

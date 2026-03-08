@@ -79,6 +79,11 @@
                                     <th
                                         class="px-6 py-4 text-left text-[10px] font-black uppercase text-gray-400 tracking-widest">
                                         Informasi Pengguna</th>
+                                    @if ($tab == 'siswa' || $tab == 'ortu')
+                                        <th
+                                            class="px-6 py-4 text-left text-[10px] font-black uppercase text-gray-400 tracking-widest">
+                                            Kelas</th>
+                                    @endif
                                     @if ($tab == 'siswa')
                                         <th
                                             class="px-6 py-4 text-left text-[10px] font-black uppercase text-gray-400 tracking-widest">
@@ -105,6 +110,37 @@
                                                 </div>
                                             </div>
                                         </td>
+
+                                        @if ($tab == 'siswa' || $tab == 'ortu')
+                                            <td class="px-6 py-4">
+                                                @php
+                                                    $className = '-';
+                                                    if ($tab == 'siswa' && $user->schoolClass) {
+                                                        $className =
+                                                            $user->schoolClass->grade .
+                                                            ' - ' .
+                                                            $user->schoolClass->name;
+                                                    } elseif ($tab == 'ortu') {
+                                                        $firstChild = $user->children->first();
+                                                        if ($firstChild && $firstChild->schoolClass) {
+                                                            $className =
+                                                                $firstChild->schoolClass->grade .
+                                                                ' - ' .
+                                                                $firstChild->schoolClass->name;
+                                                        }
+                                                    }
+                                                @endphp
+                                                @if ($className !== '-')
+                                                    <a href="{{ route('admin.classes.show', $user->schoolClass?->id ?: $user->children->first()?->school_class_id) }}"
+                                                        class="text-sm text-indigo-600 hover:underline">
+                                                        {{ $className }}
+                                                    </a>
+                                                @else
+                                                    <span
+                                                        class="text-sm text-gray-700 font-medium">{{ $className }}</span>
+                                                @endif
+                                            </td>
+                                        @endif
 
                                         @if ($tab == 'siswa')
                                             <td class="px-6 py-4">

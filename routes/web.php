@@ -102,9 +102,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/classes', [ClassController::class, 'store'])->name('classes.store');
         Route::delete('/classes/{class}', [ClassController::class, 'destroy'])->name('classes.destroy');
 
-        Route::post('/admin/classes/{id}/import', [ClassController::class, 'importSiswa'])->name('admin.classes.import');
+        // import siswa/ortu per kelas
+        Route::post('/classes/{id}/import', [ClassController::class, 'importSiswa'])->name('classes.import.siswa');
+        Route::post('/classes/{id}/import-parents', [ClassController::class, 'importParents'])->name('classes.import.parents');
+
         Route::get('/classes/{id}', [ClassController::class, 'show'])->name('classes.show');
-        Route::post('/classes/{id}/import', [ClassController::class, 'importSiswa'])->name('classes.import');
 
         // Menu Import Data
         Route::get('/imports', [ImportController::class, 'index'])->name('imports.index');
